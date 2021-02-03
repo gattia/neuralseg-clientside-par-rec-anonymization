@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+	<header class="header">
+		<div>
+			<!-- <img src="./Neural-Seg-Re-Scaled-Logo.png"> -->
+			<img src="./Touchcon.png">
+		</div>
+		<div>
+			<h1 align=center >Anonymize Par Rec Files</h1>
+		</div>
+		<div>
+			
+		</div>
+	</header>
+	
+	<div class="instructions">
+		<h3>Instructions</h3>
+		<p>
+			Use the "Choose Files" button below to select all .PAR files that you wish to anonymize.
+			These files will automatically be loaded, checked to ensure they are PAR files, and lines w/
+			identifiable information will be blinded.
+		</p>
+		<p>
+			If you want the filename of these to change, please adjust the filename before uploading. This new
+			filename will be copied into the requisite locations of the .PAR header to ensure that it properly works with
+			the .REC file. Please make the same filename changes to the .REC file.
+		</p>
+		<p>
+			Once the anonymization is complete, a download button will appear. Click this button to download
+			a .zip file containing your anonymized .PAR files. 
+		</p>
+	</div>
+
+    <div class="picker" >
+    	<h3>Choose PAR Files</h3>
+    	<form enctype="multipart/form-data">
+			<input id="upload" type=file accept="text/*,.PAR" name="files[]" multiple>
+		</form>
+		<div id="myProgress">
+		  	<div id="myBar"></div>
+		</div>
+	</div>
+	<div>
+		<!--  use in the future to potentially display the list of anonymized files  -->
+	</div>
+	<div id="retriever">
+		<button class="btn" id="download"><i class="fa fa-download"></i> Download</button>
+	</div>
+
+
+	<footer>
+		<p>Copyright &copy; NeuralSeg 2017</p>
+	</footer>
+
+
+	<script src="FileSaver.js"></script>
+	<script type="text/javascript" src="./jszip.js"></script>
+	<script src="./main.js"></script>
+</body>
+</html>
+
+
+
+
+
