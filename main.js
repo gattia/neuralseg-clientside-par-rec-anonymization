@@ -1,9 +1,3 @@
-var progress = 0;
-var elem = document.getElementById("myBar");
-var zipPercentage = 20;
-var downloadButton = document.getElementById("retriever")
-var zippedFile = null;
-
 function readFileAsync(file) {
     // read files and return contents
     // wrap in a promise so can run async await
@@ -53,45 +47,43 @@ function anonymizeParRec(strResult, baseFilename){
 async function handleFileSelect(evt) {
     // iterate over files, read the file
     // get filename, file extension, and file contents
-    let files = evt.target.files; // FileList object
-    let editedFiles = [];
-    let editedFilenames = [];
-    let filename = '';
-    let filenameEnding = '';
-    let baseFilename = '';
-    let result = '';
-    
-    // step size is how much to increment for each step of the anonymization & then zip adding. 
-    let stepSize = (100 - zipPercentage) / (files.length * 2);
+    const files = evt.target.files; // FileList object
+    const editedFiles = [];
+    const editedFilenames = [];
 
-    let reader = new FileReader();
+    // stuff for the progress bar
+    const elem = document.getElementById("myBar");
+    const downloadButton = document.getElementById("retriever")
+    const zipPercentage = 20;
+    let progress = 0;
+    // step size is how much to increment for each step of the anonymization & then zip adding. 
+    const stepSize = (100 - zipPercentage) / (files.length * 2);
+
+    
     //iterate over all files
     console.log('Number of files: ' + files.length);
     for (i = 0; i < files.length; i++) {
-        console.log('Iteration: ' + i)
-        filename = files[i].name;
-        filenameEnding = filename.substring(filename.lastIndexOf('.') + 1);
+        const reader = new FileReader();
+        const filename = files[i].name;
+        const filenameEnding = filename.substring(filename.lastIndexOf('.') + 1);
+        console.log('Iteration: ' + i + '; Filename: ' + filename)
         // if the file ending is .PAR, then anonymize the file
         if (filenameEnding === "PAR"){
-            // get base filename (without .PAR) & log it to console. 
-            baseFilename = filename.substring(0, filename.lastIndexOf(".PAR"));
-            try {
-                // call readFileAsync w/ await to ensure file is read
-                // return result as a text string. 
-                result = await readFileAsync(files[i]);
-            } catch(err) {
-                console.log(err);
-            }
+            // get base filename (without .PAR) & log it to console.
+            // it has to end with PAR so remove the X # of 
+            const baseFilename = filename.substring(0, filename.lastIndexOf(".PAR"));
+            const result = await readFileAsync(files[i]).catch(console.log)
             // anonymize the result data & add it to the pre-defined array. 
-            editedFiles.push(new Blob([anonymizeParRec(result, baseFilename)], {type: 'text/plain'}));
+            editedFiles.push(new Blob([anonymizeParRec(result, baseFilename)],
+                                      {type: 'text/plain'}));
             editedFilenames.push(filename);
         }
         progress += stepSize;
         elem.style.width = progress + "%";
     }
 
-    var zip = new JSZip();
-    const folder = zip.folder("anon");
+    const zip = new JSZip();
+    const folder = zip.folder("anonymized");
     for (i = 0; i < editedFiles.length; i++){
         console.log(editedFilenames[i]);
         console.log(editedFiles[i]);
@@ -108,16 +100,40 @@ async function handleFileSelect(evt) {
 
     downloadButton.style.display = "block";
 
-    // return zippedFile;
+    return zippedFile;
 }
 
-function downloadZip(evt){
+function downloadZip(zippedFile){
     zippedFile
-    // callback is just a placeholder. It can be nothing, or any other name
-    .then(function callback(blob) {
-        saveAs(blob, "anonymized.zip")
-    })
+        // callback is just a placeholder. It can be nothing, or any other name
+        .then(function callback(blob) {
+            saveAs(blob, "anonymized.zip")
+        })
 }
 
-document.getElementById('upload').addEventListener('change', handleFileSelect, false);
-document.getElementById('download').addEventListener('click', downloadZip, false);
+function main(){
+    // preallocated zipped file in this scope
+    let zippedFile = null;
+
+    // when upload pressed call handleFileSelect and
+    // save in zippedFile
+    document.getElementById('upload').addEventListener(
+        'change', 
+        (evt) => {
+            zippedFile = handleFileSelect(evt)
+        }, 
+        false
+    );
+    // when download button clicked, pass zippedFile to 
+    // the downloadZip function for downloading. 
+    document.getElementById('download').addEventListener(
+        'click', 
+        () => {
+            downloadZip(zippedFile);
+        }, 
+        false
+    );
+
+}
+
+main();
