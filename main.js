@@ -20,7 +20,7 @@ function anonymizeParRec(strResult, baseFilename){
     // const lines = strResult.split('\n')
     // build dict of syntax for lines to anonymize.
     const getRegExParGenInfo = (infoField) => {
-        return new RegExp("(\.\\s+" + infoField + "\\s+:\\s+).+(\\n)", "i")
+        return new RegExp("(\.\\s+" + infoField + "\\s+:\\s+).+(\r?\\n)", "i")
     }
     const dictAnonFields = [
         ["Patient name", "$1Blinded$2"],
@@ -35,7 +35,7 @@ function anonymizeParRec(strResult, baseFilename){
     });
 
     strResult = strResult.replace(
-        new RegExp("(#\\s+Dataset name:\\s+).+(\\n)", "i"),
+        new RegExp("(#\\s+Dataset name:\\s+).+(\r?\\n)", "i"),
         "$1" + baseFilename + "$2"
     );
     return strResult;
