@@ -17,31 +17,28 @@ function anonymizeParRec(strResult, baseFilename){
     // strResult is a string ouputted by reading filereader. 
     // baseFilename is the filename used to name the file. 
     // parse strResult into individual lines.
-    const lines = strResult.split('\n')
-    // build dict of syntax for lines to anonymize. 
-    const dictAnonLines = {
-        "# Dataset name:": "# Dataset name: " + baseFilename,
-        ".    Patient name                       :" : ".    Patient name                       :   Blinded",
-        // the below line may or may not have identifiable information. It is reasonably likely too.
-        // this line is therefore being blinded by default. 
-        ".    Examination name                   :" : ".    Examination name                   :   Blinded",
-        // the below line could posisbly have identifiable information, but maybe not? Add option to omit? 
-        // ".    Protocol name                      :" : ".    Protocol name                      :   Blinded",
-        ".    Examination date/time              :" : ".    Examination date/time              :   0000.00.00 / 00:00:00",
-        ".    Acquisition nr                     :" : ".    Acquisition nr                     :   0",
+    // const lines = strResult.split('\n')
+    // build dict of syntax for lines to anonymize.
+    const getRegExParGenInfo = (infoField) => {
+        return new RegExp("(\.\\s+" + infoField + "\\s+:\\s+).+(\\n)", "i")
     }
-    // iterate over every line in file.
-    lines.forEach(function(line, idx, linesArray){
-        for (const [key, value] of Object.entries(dictAnonLines)){
-            // if line includes the key then replace it.          
-            if (line.includes(key)){
-                // replace the line with the value at the key.
-                lines[idx] = value;
-            }
-        }
+    const dictAnonFields = [
+        ["Patient name", "$1Blinded$2"],
+        ["Examination name", "$1Blinded$2"],
+        ["Examination date/time", "$10000.00.00 / 00:00:00$2"],
+        ["Acquisition nr", "$10$2"]
+
+    ]
+
+    dictAnonFields.forEach(([fieldName, blinding]) => {
+        strResult = strResult.replace(getRegExParGenInfo(fieldName), blinding);
     });
 
-    return lines.join("\n");
+    strResult = strResult.replace(
+        new RegExp("(#\\s+Dataset name:\\s+).+(\\n)", "i"),
+        "$1" + baseFilename + "$2"
+    );
+    return strResult;
 }
 
 async function handleFileSelect(evt) {
